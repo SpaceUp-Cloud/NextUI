@@ -187,3 +187,5 @@ gradle-app.setting
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
 
+# MSI bundler
+wix311
