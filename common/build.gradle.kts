@@ -38,7 +38,7 @@ kotlin {
                 // Jetpack Compose Integration
                 implementation("androidx.navigation:navigation-compose:$navVersion")
 
-                val ktorVersion = "1.6.7"
+                val ktorVersion = "1.6.8"
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
@@ -59,7 +59,7 @@ kotlin {
                 api("androidx.core:core-ktx:1.9.0")
                 implementation("com.github.tony19:logback-android:2.0.1")
 
-                val ktorVersion = "1.6.7"
+                val ktorVersion = "1.6.8"
                 implementation("io.ktor:ktor-client-android:$ktorVersion")
                 implementation("io.ktor:ktor-client-json-jvm:$ktorVersion")
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
