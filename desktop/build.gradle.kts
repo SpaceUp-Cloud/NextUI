@@ -23,7 +23,7 @@ kotlin {
                 implementation(compose.desktop.currentOs) {
                     exclude("org.jetbrains.compose.material")
                 }
-                implementation("com.bybutter.compose:compose-jetbrains-expui-theme:2.0.0")
+                implementation("com.bybutter.compose:compose-jetbrains-expui-theme:2.1.0")
             }
         }
         val jvmTest by getting
