@@ -18,8 +18,6 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(project(":common"))
-                implementation(compose.desktop.currentOs)
-
                 implementation(compose.desktop.currentOs) {
                     exclude("org.jetbrains.compose.material")
                 }
@@ -34,6 +32,7 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
+            modules("jdk.unsupported")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "NextUI"
             packageVersion = "1.0.0"
