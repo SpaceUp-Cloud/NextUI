@@ -32,7 +32,7 @@ kotlin {
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
-                implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+                implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.0")
 
                 val navVersion = "2.5.3"
                 // Jetpack Compose Integration
