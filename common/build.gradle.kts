@@ -33,14 +33,15 @@ kotlin {
                 api(compose.foundation)
                 api(compose.material)
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+                implementation("androidx.compose.material3:material3:1.0.1")
+                implementation("androidx.compose.material:material-icons-extended:1.3.1")
 
-                val navVersion = "2.5.3"
-                // Jetpack Compose Integration
-                implementation("androidx.navigation:navigation-compose:$navVersion")
+                api("moe.tlaster:precompose:1.3.14")
 
                 val ktorVersion = "2.2.4"
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+                implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
@@ -49,6 +50,12 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
                 implementation("io.github.microutils:kotlin-logging:3.0.5")
+
+                val jetthemeVersion = "1.0.0"
+                // Use this if you want material design support (recommended)
+                implementation("dev.lcdsmao.jettheme:jettheme-material:$jetthemeVersion")
+                // Use this if you want to build custom design system
+                implementation("dev.lcdsmao.jettheme:jettheme:$jetthemeVersion")
             }
         }
         val commonTest by getting {
@@ -90,11 +97,11 @@ android {
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
         minSdk = 24
-        //targetSdk = 33
+        targetSdk = 33
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 dependencies {

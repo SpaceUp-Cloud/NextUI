@@ -3,9 +3,10 @@ package technology.iatlas.spaceup.common.util
 //import io.ktor.http.*
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.serialization.gson.*
 
 actual fun httpClient(): HttpClient {
     return HttpClient(CIO) {
@@ -14,7 +15,12 @@ actual fun httpClient(): HttpClient {
             level = LogLevel.ALL
         }
         install(ContentNegotiation) {
-            json()
+            gson {
+                setPrettyPrinting()
+            }
+        }
+        install(HttpTimeout) {
+            requestTimeoutMillis = 10000
         }
     }
 }
