@@ -32,7 +32,7 @@ kotlin {
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
-                implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+                implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.0")
                 implementation("androidx.compose.material3:material3:1.0.1")
                 implementation("androidx.compose.material:material-icons-extended:1.3.1")
 
