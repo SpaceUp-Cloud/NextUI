@@ -14,7 +14,7 @@
         </activity>
     </application>
     <queries>
-        !-- If your app opens https URLs -->
+        <!-- If your app opens https URLs -->
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="https"/>

@@ -18,7 +18,7 @@ actual fun httpClient(): HttpClient {
             gson()
         }
         install(HttpTimeout) {
-            requestTimeoutMillis = 10000
+            requestTimeoutMillis = 20000 // Webbackend list, Get domains take rather long
         }
     }
 }

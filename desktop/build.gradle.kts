@@ -33,7 +33,7 @@ compose.desktop {
         mainClass = "MainKt"
         nativeDistributions {
             modules("jdk.unsupported")
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.AppImage)
             packageName = "NextUI"
             packageVersion = "1.0.0"
         }

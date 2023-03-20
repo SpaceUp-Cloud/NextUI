@@ -36,6 +36,10 @@ kotlin {
                 implementation("androidx.compose.material3:material3:1.0.1")
                 implementation("androidx.compose.material:material-icons-extended:1.3.1")
 
+                val dataStoreVersion = "1.1.0-dev01"
+                implementation("androidx.datastore:datastore-preferences:$dataStoreVersion")
+                implementation("androidx.datastore:datastore-core-okio:$dataStoreVersion")
+
                 api("moe.tlaster:precompose:1.3.14")
 
                 val ktorVersion = "2.2.4"
@@ -49,7 +53,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-json:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-                implementation("io.github.microutils:kotlin-logging:3.0.5")
+                implementation("io.github.oshai:kotlin-logging:4.0.0-beta-23")
 
                 val jetthemeVersion = "1.0.0"
                 // Use this if you want material design support (recommended)
@@ -78,7 +82,7 @@ kotlin {
         }
         val androidTest by getting {
             dependencies {
-                implementation("junit:junit:4.13.2")
+                implementation("org.junit.jupiter:junit-jupiter:5.9.2")
             }
         }
         val desktopMain by getting {
@@ -103,7 +107,4 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-}
-dependencies {
-    implementation("androidx.navigation:navigation-runtime-ktx:2.5.3")
 }

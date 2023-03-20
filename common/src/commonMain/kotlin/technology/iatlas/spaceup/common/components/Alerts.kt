@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Alert(openDialog: MutableState<Boolean>, errorMsg: MutableState<String>) {
+fun Alert(openDialog: MutableState<Boolean>, errorMsg: String) {
     AlertDialog(
         onDismissRequest = {
             openDialog.value = false
@@ -30,8 +30,8 @@ fun Alert(openDialog: MutableState<Boolean>, errorMsg: MutableState<String>) {
         },
         text = {
             val baseMsg = "An error occurred: \n%s"
-            val msg = if(errorMsg.value.isEmpty()) baseMsg.replace(": %s", "")
-            else baseMsg.replace("%s", errorMsg.value)
+            val msg = if(errorMsg.isEmpty()) baseMsg.replace(": %s", "")
+            else baseMsg.replace("%s", errorMsg)
             Text(msg)
         },
         modifier = Modifier.fillMaxWidth()
