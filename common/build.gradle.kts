@@ -46,7 +46,7 @@ kotlin {
                 implementation("androidx.compose.material3:material3:1.0.1")
                 implementation("androidx.compose.material:material-icons-extended:1.3.1")
 
-                val dataStoreVersion = "1.1.0-dev01"
+                val dataStoreVersion = "1.1.0-alpha03"
                 implementation("androidx.datastore:datastore-preferences:$dataStoreVersion")
                 implementation("androidx.datastore:datastore-core-okio:$dataStoreVersion")
 
