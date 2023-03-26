@@ -19,6 +19,9 @@ repositories {
     maven {
         url = uri("https://artifactory.iatlas.dev/releases")
     }
+    maven {
+        url = uri("https://repo1.maven.org/maven2/")
+    }
 }
 
 kotlin {
@@ -32,7 +35,14 @@ kotlin {
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
-                implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.0")
+                api(compose.material3)
+                api(compose.materialIconsExtended)
+
+                // ViewModel & Navigation
+                api("moe.tlaster:precompose:1.3.14")
+
+                // Google
+                implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
                 implementation("androidx.compose.material3:material3:1.0.1")
                 implementation("androidx.compose.material:material-icons-extended:1.3.1")
 
@@ -40,10 +50,13 @@ kotlin {
                 implementation("androidx.datastore:datastore-preferences:$dataStoreVersion")
                 implementation("androidx.datastore:datastore-core-okio:$dataStoreVersion")
 
-                api("moe.tlaster:precompose:1.3.14")
+                // Jetbrains
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
                 val ktorVersion = "2.2.4"
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-auth:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
@@ -51,8 +64,8 @@ kotlin {
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
                 implementation("io.ktor:ktor-client-logging:$ktorVersion")
                 implementation("io.ktor:ktor-client-json:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+
+                // Misc.
                 implementation("io.github.oshai:kotlin-logging:4.0.0-beta-23")
 
                 val jetthemeVersion = "1.0.0"
@@ -88,6 +101,8 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 api(compose.preview)
+                api(compose.ui)
+                api(compose.material3)
                 // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
                 implementation("ch.qos.logback:logback-classic:1.4.6")
             }
@@ -107,4 +122,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+}
+dependencies {
+    implementation("io.ktor:ktor-client-auth:2.2.4")
 }

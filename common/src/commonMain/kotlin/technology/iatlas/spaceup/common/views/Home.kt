@@ -1,32 +1,30 @@
 package technology.iatlas.spaceup.common.views
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -35,12 +33,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.ExperimentalUnitApi
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -49,7 +45,9 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.ui.viewModel
 import technology.iatlas.spaceup.common.components.Alert
+import technology.iatlas.spaceup.common.components.FullscreenCircularLoader
 import technology.iatlas.spaceup.common.model.Domain
+import technology.iatlas.spaceup.common.openInBrowser
 import technology.iatlas.spaceup.common.util.httpClient
 import technology.iatlas.spaceup.common.viewmodel.ServerViewModel
 
@@ -66,39 +64,22 @@ fun Home(navigator: Navigator) {
         ServerViewModel()
     }
 
-    Column {
-        Row {
-            TextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = serverViewModel.serverUrl,
-                onValueChange = { serverViewModel.serverUrl = it },
-                label = {
-                    Text("SpaceUp-Server: ${serverViewModel.serverUrl}")
-                },
-                singleLine = true,
-                placeholder = {
-                    Text(serverViewModel.serverUrl)
-                }
-            )
-        }
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
+            //verticalAlignment = Alignment.CenterVertically,
+            //horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Button(
                 onClick = {
-                    //text = "Hello, $platformName"
                     coroutineScope.launch {
                         isLoading = true
                         try {
-                            // "Authorization": 'Bearer $jwt'
-                            val response = httpClient()
-                                .get("${serverViewModel.serverUrl}/api/domain/list?cached=$cached") {
-                                    headers {
-                                        append("Authorization", "Bearer ${serverViewModel.token.accessToken}")
-                                    }
-                                }
-                            if(response.status == HttpStatusCode.OK) {
+                            println("Get domains with ${serverViewModel.token}")
+                            val response = serverViewModel.client()
+                                .get("${serverViewModel.serverUrl}/api/domain/list?cached=$cached")
+                            if (response.status == HttpStatusCode.OK) {
                                 response.body<List<Domain>>().forEach {
                                     if (!domains.contains(it)) {
                                         domains.add(it)
@@ -110,7 +91,7 @@ fun Home(navigator: Navigator) {
                                 openDialog.value = true
                             }
                         } catch (ex: Exception) {
-                            if(ex.message != null) {
+                            if (ex.message != null) {
                                 errorMsg.value = ex.message!!
                             }
                             openDialog.value = true
@@ -134,87 +115,130 @@ fun Home(navigator: Navigator) {
                     cached = isChecked
                 }
             )
-            Button(
-                onClick = {
-                    navigator.navigate("/login")
-                }
-            ) {
-                Text("Logout")
-            }
         }
-        if (!isLoading) {
-            MessageList(domains)
-        } else {
-            if (!cached) Loader(isLoading)
-        }
+        Button(onClick = {}) { Text("Test") }
+
+        // Domain content
+        MessageList(domains)
 
         if (openDialog.value) {
             Alert(openDialog, serverViewModel.serverUrl)
         }
+    }
 
+    if (isLoading && !cached) FullscreenCircularLoader(isLoading)
+
+    LaunchedEffect(Unit) {
+        // TODO validate JWT token here
+        if (serverViewModel.token.accessToken.isEmpty()) {
+            // TODO only for testing commented out
+            //navigator.navigate(Routes.LOGOUT.path)
+        } else {
+            try {
+                // TODO move this to domainViewModel
+                // "Authorization": 'Bearer $jwt'
+                val response = serverViewModel.client()
+                    .get("${serverViewModel.serverUrl}/api/domain/list?cached=true") {
+                        headers {
+                            append("Authorization", "Bearer ${serverViewModel.token.accessToken}")
+                        }
+                    }
+                if (response.status == HttpStatusCode.OK) {
+                    response.body<List<Domain>>().forEach {
+                        if (!domains.contains(it)) {
+                            domains.add(it)
+                        }
+                    }
+                } else {
+                    // Show error
+                    errorMsg.value = response.bodyAsText()
+                    openDialog.value = true
+                }
+            } catch (ex: Exception) {
+                if (ex.message != null) {
+                    errorMsg.value = ex.message!!
+                }
+                openDialog.value = true
+            }
+        }
     }
 }
 
-@OptIn(ExperimentalUnitApi::class)
+@OptIn(ExperimentalUnitApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun MessageList(domains: List<Domain>) {
-    var expanded by remember { mutableStateOf(false) }
+    var openInBrowser by remember { mutableStateOf(false) }
+    val expanded = mutableStateOf(false)
 
+    var selectedDomain by remember { mutableStateOf("") }
     LazyColumn(
+        modifier = Modifier.padding(vertical = 12.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         items(domains.size) { index ->
             Card(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onDoubleTap = {
+                                selectedDomain = "https://${domains[index].url}"
+                            }
+                        )
+                    }
+                    .height(48.dp)
+                    .padding(8.dp)
                     .fillMaxWidth(),
-                elevation = 8.dp,
                 shape = RoundedCornerShape(8.dp),
             ) {
-                Row(modifier = Modifier.padding(8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    Text(domains[index].url)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Column{
-                        ClickableText(text = AnnotatedString("More Options"), onClick = {
-                            expanded = true
-                        })
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            //modifier = Modifier.widthIn(min = 120.dp)
-                        ) {
-                            DropdownMenuItem(onClick = { /* Aktion 1 */ }) {
-                                Text("Aktion 1")
-                            }
-                            DropdownMenuItem(onClick = { /* Aktion 2 */ }) {
-                                Text("Aktion 2")
-                            }
-                            Divider()
-                            DropdownMenuItem(onClick = { /* Aktion 3 */ }) {
-                                Text("Aktion 3")
-                            }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Text(text = domains[index].url)
+                    IconButton(
+                        onClick = {
+                            selectedDomain = "https://${domains[index].url}"
                         }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            "More"
+                        )
                     }
+
                 }
+
             }
         }
-    }
-}
-
-@Composable
-fun Loader(isLoading: Boolean) {
-    if (isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                color = MaterialTheme.colors.secondary,
-                modifier = Modifier.size(50.dp)
-            )
+        items(domains.size) {
+            DropdownMenu(
+                expanded = selectedDomain.isNotEmpty(),
+                onDismissRequest = { selectedDomain = "" },
+            ) {
+                if (openInBrowser) {
+                    openInBrowser(selectedDomain)
+                    openInBrowser = false
+                    expanded.value = false
+                }
+                DropdownMenuItem(
+                    text = { Text("Open") },
+                    onClick = {
+                        openInBrowser = true
+                    })
+                Divider()
+                DropdownMenuItem(
+                    modifier = Modifier.align(Alignment.End),
+                    text = {
+                        Text(
+                            "Delete",
+                            style = TextStyle(color = MaterialTheme.colorScheme.error)
+                        )
+                    },
+                    onClick = {
+                        // Delete Domain with Alert warning
+                    })
+            }
         }
     }
 }

@@ -2,10 +2,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Switch
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -16,11 +16,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.toPainter
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import io.kanro.compose.jetbrains.expui.control.ActionButton
@@ -41,11 +41,9 @@ import moe.tlaster.precompose.ui.LocalViewModelStoreOwner
 import moe.tlaster.precompose.viewmodel.ViewModelStore
 import moe.tlaster.precompose.viewmodel.ViewModelStoreOwner
 import technology.iatlas.spaceup.common.App
-import java.io.File
-import java.util.logging.Level
-import java.util.logging.Logger
 import javax.imageio.ImageIO
 
+val profile = System.getProperty("nextui.profile") ?: ""
 
 @OptIn(ExperimentalFoundationApi::class)
 fun main() = application {
@@ -58,16 +56,16 @@ fun main() = application {
         isDark
     }
 
-    val theme = if (isDarkMode) {
+    val currentTheme = if (isDarkMode) {
         DarkTheme
     } else {
         LightTheme
     }
 
-    val imageFile = File(this::class.java.getResource("/spaceup_icon.png").toURI())
-    val icon = ImageIO.read(imageFile).toPainter()
-
-    val state = rememberWindowState(size = DpSize(900.dp, 700.dp))
+    val state = rememberWindowState(
+        size = DpSize(700.dp, 750.dp),
+        position = WindowPosition(Alignment.BottomCenter)
+    )
 
     val holder = remember {
         PreComposeWindowHolder()
@@ -87,13 +85,13 @@ fun main() = application {
 
     ProvideDesktopCompositionLocals(holder) {
         JBWindow(
-            icon = icon,
+            icon = ImageIO.read(this::class.java.getResourceAsStream("/spaceup_icon.png")).toPainter(),
             onCloseRequest = {
                 holder.lifecycle.currentState = Lifecycle.State.Destroyed
                 exitApplication()
             },
-            title = "SpaceUp-NextUI",
-            theme = theme,
+            title = "SpaceUp-NextUI ${if(profile.isNotEmpty()) profile.uppercase() else ""}",
+            theme = currentTheme,
             state = state,
             mainToolBar = {
                 Row(Modifier.mainToolBarItem(Alignment.End)) {
@@ -110,7 +108,7 @@ fun main() = application {
                             }
                         }
                     }
-                    Tooltip("Auto dark mode") {
+                    Tooltip("Auto dark mode: currently ${if (isDarkMode) "dark" else "light"}") {
                         Switch(
                             checked = isAutoMode,
                             onCheckedChange = {
@@ -121,38 +119,9 @@ fun main() = application {
                 }
             }
         ) {
-            CustomTheme(
-                darkTheme = isDarkMode
-            ) {
-                App()
-            }
+            App(useDarkTheme = isDarkMode)
         }
     }
-}
-
-@Composable
-fun CustomTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val lightThemeColors = lightColors(
-        primary = Color(0xFFDD0D3C),
-        secondary = Color.Magenta,
-        error = Color(0xFFD00036),
-        background = Color.White,
-    )
-
-    val darkThemeColors = darkColors(
-        primary = Color.Gray,
-        secondary = Color.LightGray,
-        error = Color(0xFFD00036),
-        background = Color.DarkGray
-    )
-
-    MaterialTheme(
-        colors = if(darkTheme) darkThemeColors else lightThemeColors,
-        content = content
-    )
 }
 
 @Composable
