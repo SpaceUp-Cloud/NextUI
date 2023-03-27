@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -151,6 +152,7 @@ fun Drawer(
                                         endX = 20.0f
                                     )
                                 ),
+                            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.Transparent),
                             title = { Text("NextUI") },
                             navigationIcon = {
                                 IconButton(onClick = {
