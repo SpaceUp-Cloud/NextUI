@@ -84,7 +84,7 @@ kotlin {
             dependencies {
                 api("androidx.appcompat:appcompat:1.6.1")
                 api("androidx.core:core-ktx:1.9.0")
-                implementation("com.github.tony19:logback-android:2.0.1")
+                implementation("com.github.tony19:logback-android:3.0.0")
 
                 val ktorVersion = "2.2.4"
                 implementation("io.ktor:ktor-client-android:$ktorVersion")
