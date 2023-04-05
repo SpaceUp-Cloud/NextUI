@@ -66,7 +66,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-json:$ktorVersion")
 
                 // Misc.
-                implementation("io.github.oshai:kotlin-logging:4.0.0-beta-27")
+                implementation("io.github.oshai:kotlin-logging:4.0.0-beta-28")
 
                 val jetthemeVersion = "1.0.0"
                 // Use this if you want material design support (recommended)
