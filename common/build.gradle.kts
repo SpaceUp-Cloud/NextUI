@@ -73,6 +73,9 @@ kotlin {
                 implementation("dev.lcdsmao.jettheme:jettheme-material:$jetthemeVersion")
                 // Use this if you want to build custom design system
                 implementation("dev.lcdsmao.jettheme:jettheme:$jetthemeVersion")
+
+                // Settings
+                implementation("com.russhwolf:multiplatform-settings-no-arg:1.0.0")
             }
         }
         val commonTest by getting {

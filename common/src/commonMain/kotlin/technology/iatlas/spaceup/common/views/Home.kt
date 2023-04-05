@@ -1,12 +1,9 @@
 package technology.iatlas.spaceup.common.views
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideIn
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,10 +35,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -53,7 +48,6 @@ import moe.tlaster.precompose.ui.viewModel
 import technology.iatlas.spaceup.common.components.Alert
 import technology.iatlas.spaceup.common.components.FullscreenCircularLoader
 import technology.iatlas.spaceup.common.model.Domain
-import technology.iatlas.spaceup.common.model.Routes
 import technology.iatlas.spaceup.common.openInBrowser
 import technology.iatlas.spaceup.common.viewmodel.ServerViewModel
 
@@ -126,9 +120,9 @@ fun Home(navigator: Navigator) {
         if (openDialog.value) {
             Alert(openDialog, serverViewModel.serverUrl)
         }
-    }
 
-    if (isLoading && !cached) FullscreenCircularLoader(isLoading)
+        if (!cached) FullscreenCircularLoader(isLoading)
+    }
 
     LaunchedEffect(Unit) {
         try {

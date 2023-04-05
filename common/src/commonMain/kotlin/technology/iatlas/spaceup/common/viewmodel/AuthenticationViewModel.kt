@@ -45,7 +45,6 @@ class AuthenticationViewModel : ViewModel() {
         }
     }
 }
-// {"username":"thraax","access_token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aHJhYXgiLCJuYmYiOjE2Nzg2MjU5NjMsInJvbGVzIjpbXSwiaXNzIjoic3BhY2UtdXAiLCJleHAiOjE2Nzg2Mjk1NjMsImlhdCI6MTY3ODYyNTk2M30.5O9vwaIeAvFrYZZnEBrt_vob2wAkcZ9IRSJzguPvnac","token_type":"Bearer","expires_in":3600}
 
 data class Token(
     val username: String,

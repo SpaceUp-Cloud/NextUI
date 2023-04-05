@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,12 +43,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.get
+import com.russhwolf.settings.set
 import io.github.oshai.KotlinLogging
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.ui.viewModel
 import technology.iatlas.spaceup.common.components.Alert
 import technology.iatlas.spaceup.common.model.Routes
+import technology.iatlas.spaceup.common.model.SettingsConstants
 import technology.iatlas.spaceup.common.viewmodel.AuthenticationViewModel
 import technology.iatlas.spaceup.common.viewmodel.ServerViewModel
 
@@ -71,6 +75,13 @@ fun Login(navigator: Navigator) {
     val focusRequesterUsername = remember { FocusRequester() }
     val focusRequesterPassword = remember { FocusRequester() }
     val focusRequesterSettings = remember { FocusRequester() }
+
+    val settings = Settings()
+
+    var rememberServer by remember { mutableStateOf(
+        settings.getBoolean(SettingsConstants.REMEMBER_SERVER.toString(), false)) }
+    var rememberUserPassword by remember { mutableStateOf(
+        settings.getBoolean(SettingsConstants.REMEMBER_CREDENTIALS.toString(), false)) }
 
     val coroutineScope = rememberCoroutineScope()
     val serverViewModel = viewModel(ServerViewModel::class) {
@@ -117,10 +128,33 @@ fun Login(navigator: Navigator) {
             },
             value = serverViewModel.serverUrl,
             onValueChange = {
-                serverViewModel.serverUrl = it.trim()
+                val serverUrl = it.trim()
+                serverViewModel.serverUrl = serverUrl
+                if(rememberServer) {
+                    val serverConst = SettingsConstants.SERVER_URL.toString()
+                    settings[serverConst] = serverUrl
+                }
             }
         )
-        Spacer(modifier = Modifier.height(30.dp))
+        Row {
+            Checkbox(
+                modifier = Modifier.padding(16.dp),
+                checked = rememberServer,
+                onCheckedChange = {
+                    rememberServer = it
+                    val rememberServerConst = SettingsConstants.REMEMBER_SERVER.toString()
+                    val serverConst = SettingsConstants.SERVER_URL.toString()
+                    settings[rememberServerConst] = rememberServer
+                    if(rememberServer) {
+                        settings[serverConst] = serverViewModel.serverUrl
+                    } else {
+                        settings[serverConst] = ""
+                    }
+                }
+            )
+            Text("Remember server?", modifier = Modifier.padding(16.dp))
+        }
+        Spacer(modifier = Modifier.height(15.dp))
         OutlinedTextField(
             modifier = Modifier
                 .focusRequester(focusRequesterUsername)
@@ -136,7 +170,12 @@ fun Login(navigator: Navigator) {
             },
             value = authenticationViewModel.username,
             onValueChange = {
-                authenticationViewModel.username = it.trim()
+                val username = it.trim()
+                authenticationViewModel.username = username
+                if(rememberUserPassword) {
+                    val usernameConst = SettingsConstants.USERNAME.toString()
+                    settings[usernameConst] = username
+                }
             }
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -155,7 +194,12 @@ fun Login(navigator: Navigator) {
             },
             value = authenticationViewModel.password,
             onValueChange = {
-                authenticationViewModel.password = it.trim()
+                val password = it.trim()
+                authenticationViewModel.password = password
+                if(rememberUserPassword) {
+                    val passwordConst = SettingsConstants.PASSWORD.toString()
+                    settings[passwordConst] = password
+                }
             },
             visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -173,6 +217,27 @@ fun Login(navigator: Navigator) {
                 }
             }
         )
+        Row {
+            Checkbox(
+                modifier = Modifier.padding(16.dp),
+                checked = rememberUserPassword,
+                onCheckedChange = {
+                    rememberUserPassword = it
+                    val rememberCredentials = SettingsConstants.REMEMBER_CREDENTIALS.toString()
+                    val username = SettingsConstants.USERNAME.toString()
+                    val password = SettingsConstants.PASSWORD.toString()
+                    settings[rememberCredentials] = rememberUserPassword
+                    if(rememberUserPassword) {
+                        settings[username] = authenticationViewModel.username
+                        settings[password] = authenticationViewModel.password
+                    } else {
+                        settings[username] = ""
+                        settings[password] = ""
+                    }
+                }
+            )
+            Text("Remember Credentials?", modifier = Modifier.padding(16.dp))
+        }
         Row {
             val formIsFilled = authenticationViewModel.username.isNotEmpty()
                     && authenticationViewModel.password.isNotEmpty() && serverViewModel.serverUrl.isNotEmpty()
@@ -202,7 +267,6 @@ fun Login(navigator: Navigator) {
                     .focusRequester(focusRequesterSettings)
                     .onKeyEvent { keyEvent ->
                         if (keyEvent.key == Key.S && keyEvent.isCtrlPressed) {
-                            println("Trigger CtrlLeft + S")
                             navigator.navigate("/settings")
                             true
                         } else {
@@ -220,6 +284,13 @@ fun Login(navigator: Navigator) {
 
     LaunchedEffect(Unit) {
         focusRequesterUrl.requestFocus()
+        val serverConst = SettingsConstants.SERVER_URL.toString()
+        serverViewModel.serverUrl = settings[serverConst] ?: "https://"
+
+        val usernameConst = SettingsConstants.USERNAME.toString()
+        val passwordConst = SettingsConstants.PASSWORD.toString()
+        authenticationViewModel.username = settings[usernameConst] ?: ""
+        authenticationViewModel.password = settings[passwordConst] ?: ""
     }
 
     if (openDialog.value) {
