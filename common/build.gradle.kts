@@ -84,7 +84,6 @@ kotlin {
             dependencies {
                 api("androidx.appcompat:appcompat:1.6.1")
                 api("androidx.core:core-ktx:1.9.0")
-                implementation("com.github.tony19:logback-android:3.0.0")
 
                 val ktorVersion = "2.2.4"
                 implementation("io.ktor:ktor-client-android:$ktorVersion")
@@ -122,6 +121,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    namespace = "technology.iatlas.spaceup.common"
 }
 dependencies {
     implementation("io.ktor:ktor-client-auth:2.2.4")

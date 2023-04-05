@@ -83,7 +83,7 @@ fun Login(navigator: Navigator) {
     Column(
         // modifier = Modifier.fillMaxSize(), // To make it center center
         modifier = Modifier
-            .padding(top = 18.dp)
+            .padding(top = 48.dp)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

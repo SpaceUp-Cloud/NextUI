@@ -12,10 +12,10 @@ import io.ktor.serialization.kotlinx.json.*
 
 actual fun httpClient(bearerToken: String): HttpClient {
     return HttpClient(Android) {
-        install(Logging) {
+        /*install(Logging) {
             logger = Logger.DEFAULT
             level = LogLevel.ALL
-        }
+        }*/
         install(ContentNegotiation) {
             gson()
         }

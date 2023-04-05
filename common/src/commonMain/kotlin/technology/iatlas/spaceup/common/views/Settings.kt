@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Button
-import androidx.compose.material.Checkbox
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
@@ -34,7 +34,6 @@ fun SettingsView(navigator: Navigator) {
     )
 
     Column {
-        Button({navigator.goBack()}) { Text("Go back") }
         Settings(settingsList = settingsList)
     }
 }
@@ -60,7 +59,7 @@ fun SettingItem(setting: SettingItem) {
         Icon(imageVector = setting.icon, contentDescription = null)
         Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
             Text(text = setting.title)
-            Text(text = setting.description, style = MaterialTheme.typography.caption)
+            Text(text = setting.description, style = MaterialTheme.typography.bodyMedium)
         }
         Checkbox(checked = setting.value, onCheckedChange = setting.action)
     }

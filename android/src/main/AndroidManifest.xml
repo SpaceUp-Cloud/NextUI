@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="technology.iatlas.spaceup.android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
             android:icon="@mipmap/launcher_icon"
             android:label="SpaceUp-NextUI"

@@ -1,6 +1,11 @@
 package technology.iatlas.spaceup.common.views
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideIn
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,7 +40,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.ExperimentalUnitApi
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -47,8 +53,8 @@ import moe.tlaster.precompose.ui.viewModel
 import technology.iatlas.spaceup.common.components.Alert
 import technology.iatlas.spaceup.common.components.FullscreenCircularLoader
 import technology.iatlas.spaceup.common.model.Domain
+import technology.iatlas.spaceup.common.model.Routes
 import technology.iatlas.spaceup.common.openInBrowser
-import technology.iatlas.spaceup.common.util.httpClient
 import technology.iatlas.spaceup.common.viewmodel.ServerViewModel
 
 @Composable
@@ -67,10 +73,7 @@ fun Home(navigator: Navigator) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        Row(
-            //verticalAlignment = Alignment.CenterVertically,
-            //horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
+        Row {
             Button(
                 onClick = {
                     coroutineScope.launch {
@@ -116,7 +119,6 @@ fun Home(navigator: Navigator) {
                 }
             )
         }
-        Button(onClick = {}) { Text("Test") }
 
         // Domain content
         MessageList(domains)
@@ -129,116 +131,107 @@ fun Home(navigator: Navigator) {
     if (isLoading && !cached) FullscreenCircularLoader(isLoading)
 
     LaunchedEffect(Unit) {
-        // TODO validate JWT token here
-        if (serverViewModel.token.accessToken.isEmpty()) {
-            // TODO only for testing commented out
-            //navigator.navigate(Routes.LOGOUT.path)
-        } else {
-            try {
-                // TODO move this to domainViewModel
-                // "Authorization": 'Bearer $jwt'
-                val response = serverViewModel.client()
-                    .get("${serverViewModel.serverUrl}/api/domain/list?cached=true") {
-                        headers {
-                            append("Authorization", "Bearer ${serverViewModel.token.accessToken}")
-                        }
+        try {
+            // TODO move this to domainViewModel
+            // "Authorization": 'Bearer $jwt'
+            val response = serverViewModel.client()
+                .get("${serverViewModel.serverUrl}/api/domain/list?cached=true") {
+                    headers {
+                        append("Authorization", "Bearer ${serverViewModel.token.accessToken}")
                     }
-                if (response.status == HttpStatusCode.OK) {
-                    response.body<List<Domain>>().forEach {
-                        if (!domains.contains(it)) {
-                            domains.add(it)
-                        }
+                }
+            if (response.status == HttpStatusCode.OK) {
+                response.body<List<Domain>>().forEach {
+                    if (!domains.contains(it)) {
+                        domains.add(it)
                     }
-                } else {
-                    // Show error
-                    errorMsg.value = response.bodyAsText()
-                    openDialog.value = true
                 }
-            } catch (ex: Exception) {
-                if (ex.message != null) {
-                    errorMsg.value = ex.message!!
-                }
+            } else {
+                // Show error
+                errorMsg.value = response.bodyAsText()
                 openDialog.value = true
             }
+        } catch (ex: Exception) {
+            if (ex.message != null) {
+                errorMsg.value = ex.message!!
+            }
+            openDialog.value = true
         }
     }
 }
 
-@OptIn(ExperimentalUnitApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MessageList(domains: List<Domain>) {
-    var openInBrowser by remember { mutableStateOf(false) }
     val expanded = mutableStateOf(false)
+    val selectedDomain = mutableStateOf("")
 
-    var selectedDomain by remember { mutableStateOf("") }
     LazyColumn(
         modifier = Modifier.padding(vertical = 12.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         items(domains.size) { index ->
-            Card(
-                modifier = Modifier
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onDoubleTap = {
-                                selectedDomain = "https://${domains[index].url}"
-                            }
-                        )
-                    }
-                    .height(48.dp)
-                    .padding(8.dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
+            AnimatedVisibility(
+                domains[index].url.isNotEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceAround
+                Card(
+                    modifier = Modifier
+                        .height(60.dp)
+                        .padding(4.dp)
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
                 ) {
-                    Text(text = domains[index].url)
-                    IconButton(
-                        onClick = {
-                            selectedDomain = "https://${domains[index].url}"
-                        }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            "More"
-                        )
-                    }
-
-                }
-
-            }
-        }
-        items(domains.size) {
-            DropdownMenu(
-                expanded = selectedDomain.isNotEmpty(),
-                onDismissRequest = { selectedDomain = "" },
-            ) {
-                if (openInBrowser) {
-                    openInBrowser(selectedDomain)
-                    openInBrowser = false
-                    expanded.value = false
-                }
-                DropdownMenuItem(
-                    text = { Text("Open") },
-                    onClick = {
-                        openInBrowser = true
-                    })
-                Divider()
-                DropdownMenuItem(
-                    modifier = Modifier.align(Alignment.End),
-                    text = {
                         Text(
-                            "Delete",
-                            style = TextStyle(color = MaterialTheme.colorScheme.error)
+                            text = domains[index].url,
+                            fontWeight = FontWeight.Bold
                         )
-                    },
-                    onClick = {
-                        // Delete Domain with Alert warning
-                    })
+                        IconButton(
+                            onClick = {
+                                expanded.value = !expanded.value
+                            }
+                        ) {
+                            Column {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    "More"
+                                )
+                                DropdownMenu(
+                                    expanded = expanded.value,
+                                    onDismissRequest = { expanded.value = false },
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Open") },
+                                        onClick = {
+                                            selectedDomain.value = "https://${domains[index].url}"
+                                        })
+                                    Divider()
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                "Delete",
+                                                style = TextStyle(color = MaterialTheme.colorScheme.error)
+                                            )
+                                        },
+                                        onClick = {
+                                            // Delete Domain with Alert warning
+                                        })
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
+    }
+
+    if(selectedDomain.value.isNotEmpty()) {
+        openInBrowser(selectedDomain.value)
     }
 }

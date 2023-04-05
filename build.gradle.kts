@@ -12,7 +12,7 @@ allprojects {
 plugins {
     kotlin("multiplatform") apply false
     kotlin("android") apply false
-    id("com.android.application") apply false version "7.3.1"
-    id("com.android.library") apply false version "7.3.1"
+    id("com.android.application") apply false version "7.4.1"
+    id("com.android.library") apply false version "7.4.1"
     id("org.jetbrains.compose") apply false
 }

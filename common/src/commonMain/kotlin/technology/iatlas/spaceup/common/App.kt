@@ -24,7 +24,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -47,7 +46,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.example.compose.AppTheme
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.Navigator
@@ -55,8 +53,11 @@ import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
 import moe.tlaster.precompose.ui.LocalViewModelStoreOwner
+import moe.tlaster.precompose.ui.viewModel
 import moe.tlaster.precompose.viewmodel.ViewModelStoreOwner
 import technology.iatlas.spaceup.common.model.Routes
+import technology.iatlas.spaceup.common.theme.AppTheme
+import technology.iatlas.spaceup.common.viewmodel.ServerViewModel
 import technology.iatlas.spaceup.common.views.Home
 import technology.iatlas.spaceup.common.views.Login
 import technology.iatlas.spaceup.common.views.SettingsView
@@ -67,9 +68,13 @@ fun App(useDarkTheme: Boolean = isSystemInDarkTheme()) {
         val navigator = rememberNavigator()
         val viewModelStoreOwner = LocalViewModelStoreOwner.current
 
+        val serverViewModel = viewModel(ServerViewModel::class) {
+            ServerViewModel()
+        }
+
         NavHost(
             navigator = navigator,
-            initialRoute = Routes.HOME.path
+            initialRoute = if(serverViewModel.token.accessToken.isNotEmpty()) Routes.HOME.path else Routes.LOGIN.path
         ) {
             scene(route = Routes.LOGIN.path, navigation = navigator, viewModelStoreOwner = viewModelStoreOwner) {
                 Login(it)
@@ -135,48 +140,52 @@ fun Drawer(
     val drawerList = Routes.values().toList()
     ModalNavigationDrawer(
         content = {
-            Surface {
-                Scaffold(
-                    //modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        TopAppBar(
-                            modifier = Modifier
-                                .background(
-                                    alpha = 1.0f,
-                                    brush = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            Color.Blue,
-                                            Color.Red
-                                        ),
-                                        startX = 10.0f,
-                                        endX = 20.0f
-                                    )
-                                ),
-                            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.Transparent),
-                            title = { Text("NextUI") },
-                            navigationIcon = {
-                                IconButton(onClick = {
-                                    coroutine.launch {
-                                        drawerState.open()
-                                    }
-                                }) {
-                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+            Scaffold(
+                //modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    TopAppBar(
+                        modifier = Modifier
+                            .background(
+                                alpha = 1.0f,
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color.Gray,
+                                        Color(	0, 128, 128), // Teal
+                                        Color.Gray
+                                    ),
+                                    //startX = 10.0f,
+                                    //endX = 20.0f
+                                )
+                            )
+                            .padding(0.dp),
+                        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.Transparent),
+                        title = { Text("NextUI") },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                coroutine.launch {
+                                    drawerState.open()
                                 }
-                            },
-                            actions = {
-                                IconButton(onClick = {
-
-                                }) {
-                                    Icon(Icons.Default.Search, contentDescription = "Search")
-                                }
+                            }) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu")
                             }
-                        )
-                    }
-                ) {
-                    Column {
-                        content.invoke(navigation)
-                    }
+                        },
+                        actions = {
+                            IconButton(onClick = {
+
+                            }) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
+                        }
+                    )
                 }
+            ) {
+                Column(modifier = Modifier
+                    //.fillMaxSize()
+                    .padding(top = it.calculateTopPadding())
+                ) {
+                    content.invoke(navigation)
+                }
+
             }
         },
         drawerState = drawerState,

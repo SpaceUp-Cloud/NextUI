@@ -47,4 +47,5 @@ android {
             isMinifyEnabled = true
         }
     }
+    namespace = "technology.iatlas.spaceup.android"
 }

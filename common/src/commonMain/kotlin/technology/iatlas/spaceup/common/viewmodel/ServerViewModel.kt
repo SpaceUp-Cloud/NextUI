@@ -13,6 +13,16 @@ class ServerViewModel : ViewModel() {
     // Contains the JWT for authentication
     var token by mutableStateOf(Token("", "", 0))
 
+    /**
+     * Check if the given JWT is valid or not
+     *
+     * @return is valid JWT
+     */
+    fun validToken(): Boolean {
+        // TODO me
+        return true
+    }
+
     fun client(): HttpClient {
         return httpClient(token.accessToken)
     }
