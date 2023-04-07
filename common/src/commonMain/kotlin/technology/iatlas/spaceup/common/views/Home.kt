@@ -1,9 +1,6 @@
 package technology.iatlas.spaceup.common.views
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -157,41 +154,38 @@ fun Home(navigator: Navigator) {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MessageList(domains: List<Domain>) {
-    val expanded = mutableStateOf(false)
-    val selectedDomain = mutableStateOf("")
-
     LazyColumn(
         modifier = Modifier.padding(vertical = 12.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         items(domains.size) { index ->
-            AnimatedVisibility(
-                domains[index].url.isNotEmpty(),
-                enter = fadeIn(),
-                exit = fadeOut()
+            Card(
+                modifier = Modifier
+                    .height(60.dp)
+                    .padding(4.dp)
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
             ) {
-                Card(
-                    modifier = Modifier
-                        .height(60.dp)
-                        .padding(4.dp)
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
+                val expanded = mutableStateOf(false)
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Text(
-                            text = domains[index].url,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Text(
+                        text = domains[index].url,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Row {
                         IconButton(
                             onClick = {
                                 expanded.value = !expanded.value
                             }
                         ) {
-                            Column {
+                            Column(
+                                horizontalAlignment = Alignment.End
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.MoreVert,
                                     "More"
@@ -203,7 +197,7 @@ fun MessageList(domains: List<Domain>) {
                                     DropdownMenuItem(
                                         text = { Text("Open") },
                                         onClick = {
-                                            selectedDomain.value = "https://${domains[index].url}"
+                                            openInBrowser("https://${domains[index].url}")
                                         })
                                     Divider()
                                     DropdownMenuItem(
@@ -223,9 +217,5 @@ fun MessageList(domains: List<Domain>) {
                 }
             }
         }
-    }
-
-    if(selectedDomain.value.isNotEmpty()) {
-        openInBrowser(selectedDomain.value)
     }
 }
