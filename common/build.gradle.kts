@@ -43,7 +43,7 @@ kotlin {
 
                 // Google
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-                implementation("androidx.compose.material3:material3:1.0.1")
+                implementation("androidx.compose.material3:material3:1.1.0")
                 implementation("androidx.compose.material:material-icons-extended:1.4.2")
 
                 val dataStoreVersion = "1.1.0-alpha04"
