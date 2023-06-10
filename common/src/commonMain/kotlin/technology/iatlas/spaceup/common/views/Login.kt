@@ -291,6 +291,8 @@ fun Login(navigator: Navigator) {
         val passwordConst = SettingsConstants.PASSWORD.toString()
         authenticationViewModel.username = settings[usernameConst] ?: ""
         authenticationViewModel.password = settings[passwordConst] ?: ""
+
+        serverViewModel.checkExpiresIn()
     }
 
     if (openDialog.value) {

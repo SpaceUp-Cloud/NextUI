@@ -2,7 +2,6 @@ package technology.iatlas.spaceup.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -31,6 +30,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -137,6 +139,10 @@ fun Drawer(
     val coroutine = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
+    val serverViewModel = viewModel(ServerViewModel::class) {
+        ServerViewModel()
+    }
+
     val drawerList = Routes.values().toList()
     ModalNavigationDrawer(
         content = {
@@ -192,28 +198,38 @@ fun Drawer(
         drawerContent = {
             Column(
                 modifier = Modifier
-                    .width(240.dp)
+                    .width(320.dp)
                     .background(MaterialTheme.colorScheme.onPrimary)
             ) {
-                Card(
-                    shape = NavShape(0.dp, 1.0f),
-                    elevation = CardDefaults.elevatedCardElevation(),
-                    modifier = Modifier
-                        .height(60.dp)
-                        .fillMaxWidth()
-                ) {
-                    Box(
-                        contentAlignment = Alignment.CenterStart,
+                if(serverViewModel.token.accessToken.isNotEmpty()) {
+                    Card(
+                        shape = NavShape(0.dp, 1.0f),
+                        elevation = CardDefaults.elevatedCardElevation(),
                         modifier = Modifier
+                            .height(30.dp)
                             .align(Alignment.CenterHorizontally)
+                            .fillMaxWidth()
                     ) {
-                        /*Image(
-                            modifier = Modifier
-                                .fillMaxHeight(),
-                                // FIXME for Android
-                            painter = painterResource("/spaceup_icon.png"),
-                            contentDescription = "SpaceUp NextUI"
-                        )*/
+                        Text(
+                            serverViewModel.serverUrl,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Card(
+                        shape = NavShape(0.dp, 1.0f),
+                        elevation = CardDefaults.elevatedCardElevation(),
+                        modifier = Modifier
+                            .height(30.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            serverViewModel.expiresAsString,
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
                 LazyColumn(
