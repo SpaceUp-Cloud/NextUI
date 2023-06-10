@@ -51,7 +51,7 @@ kotlin {
                 implementation("androidx.datastore:datastore-core-okio:$dataStoreVersion")
 
                 // Jetbrains
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
                 val ktorVersion = "2.3.1"
