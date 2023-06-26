@@ -106,7 +106,7 @@ kotlin {
                 api(compose.ui)
                 api(compose.material3)
                 // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
-                implementation("ch.qos.logback:logback-classic:1.4.7")
+                implementation("ch.qos.logback:logback-classic:1.4.8")
             }
         }
         val desktopTest by getting
