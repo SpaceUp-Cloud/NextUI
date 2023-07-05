@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
-import io.github.oshai.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.ui.viewModel

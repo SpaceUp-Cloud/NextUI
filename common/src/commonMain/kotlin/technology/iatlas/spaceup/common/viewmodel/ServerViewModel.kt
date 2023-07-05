@@ -5,28 +5,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.get
-import io.github.oshai.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import moe.tlaster.precompose.viewmodel.ViewModel
 import technology.iatlas.spaceup.common.model.SettingsConstants
 import technology.iatlas.spaceup.common.util.httpClient
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.timer
-import kotlin.math.roundToInt
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
 
 class ServerViewModel : ViewModel() {
     private val logger = KotlinLogging.logger { }
@@ -55,9 +45,9 @@ class ServerViewModel : ViewModel() {
                 } else {
                     expiresAsString = "Session " +
                             "${token.expiresIn.seconds}" // sec in min
-                    logger.info { "token expires in ${token.expiresIn.seconds}" }
+                    logger.trace { "token expires in ${token.expiresIn.seconds}" }
                     // 1 second
-                    Thread.sleep(1000) // somehow more accurate than Kotlin delay(...)
+                    delay(1000) // somehow more accurate than Kotlin delay(...)
                     token.expiresIn = token.expiresIn - 1
                 }
             }
