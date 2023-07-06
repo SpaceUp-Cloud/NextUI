@@ -39,7 +39,7 @@ kotlin {
                 api(compose.materialIconsExtended)
 
                 // ViewModel & Navigation
-                api("moe.tlaster:precompose:1.3.15")
+                api("moe.tlaster:precompose:1.4.3")
 
                 // Google
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
