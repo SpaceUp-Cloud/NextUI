@@ -126,5 +126,5 @@ android {
     namespace = "technology.iatlas.spaceup.common"
 }
 dependencies {
-    implementation("io.ktor:ktor-client-auth:2.3.2")
+    implementation("io.ktor:ktor-client-auth:2.3.3")
 }
