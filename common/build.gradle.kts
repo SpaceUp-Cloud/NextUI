@@ -44,7 +44,7 @@ kotlin {
                 // Google
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
                 implementation("androidx.compose.material3:material3:1.1.1")
-                implementation("androidx.compose.material:material-icons-extended:1.5.0")
+                implementation("androidx.compose.material:material-icons-extended:1.4.3")
 
                 val dataStoreVersion = "1.1.0-alpha04"
                 implementation("androidx.datastore:datastore-preferences:$dataStoreVersion")
@@ -95,7 +95,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
             }
         }
-        val androidTest by getting {
+        val androidUnitTest by getting {
             dependencies {
                 implementation("org.junit.jupiter:junit-jupiter:5.10.0")
             }
@@ -124,7 +124,4 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     namespace = "technology.iatlas.spaceup.common"
-}
-dependencies {
-    implementation("io.ktor:ktor-client-auth:2.3.3")
 }
