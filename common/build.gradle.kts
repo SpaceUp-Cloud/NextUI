@@ -52,7 +52,7 @@ kotlin {
 
                 // Jetbrains
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 
                 val ktorVersion = "2.3.2"
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
