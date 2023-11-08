@@ -1,4 +1,4 @@
-package technology.iatlas.spaceup.common.views
+package technology.iatlas.spaceup.common.pages
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -32,13 +32,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.russhwolf.settings.Settings
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -46,29 +46,39 @@ import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.navigation.Navigator
-import moe.tlaster.precompose.ui.viewModel
-import technology.iatlas.spaceup.common.components.Alert
+import moe.tlaster.precompose.koin.koinViewModel
+import moe.tlaster.precompose.stateholder.LocalSavedStateHolder
+import technology.iatlas.spaceup.common.OpenInBrowser
+import technology.iatlas.spaceup.common.components.ErrorAlert
 import technology.iatlas.spaceup.common.components.FullscreenCircularLoader
 import technology.iatlas.spaceup.common.model.Domain
-import technology.iatlas.spaceup.common.openInBrowser
+import technology.iatlas.spaceup.common.model.SettingsConstants
+import technology.iatlas.spaceup.common.util.httpClient
 import technology.iatlas.spaceup.common.viewmodel.ServerViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun Home(navigator: Navigator) {
+fun DomainsView() {
     val logger = KotlinLogging.logger {}
-    val coroutineScope = rememberCoroutineScope()
-    val cached = remember { mutableStateOf(false) }
+
+    val settings = Settings()
+
+    val cached = remember { mutableStateOf(true) }
     var isLoading by remember { mutableStateOf(false) }
     val domains = remember { mutableStateListOf<Domain>() }
     val openDialog = remember { mutableStateOf(false) }
     val errorMsg = remember { mutableStateOf("") }
     var isEnabled by remember { mutableStateOf(true) }
 
-    val serverViewModel = viewModel(ServerViewModel::class) {
-        ServerViewModel()
-    }
+    val stateHolder = LocalSavedStateHolder.current
+    val serverViewModel = koinViewModel(ServerViewModel::class) { org.koin.core.parameter.parametersOf(stateHolder) }
+    val serverUrl = serverViewModel.serverUrl
+
+    val client =  httpClient(settings.getString(SettingsConstants.ACCESS_TOKEN.toString(), ""))
+
+    // Create grid view layout
+
+
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -81,8 +91,8 @@ fun Home(navigator: Navigator) {
                         isLoading = true
                         isEnabled = false
                         try {
-                            val response = serverViewModel.client()
-                                .get("${serverViewModel.serverUrl}/api/domain/list?cached=${cached.value}")
+                            val response = client
+                                .get("${serverUrl}/api/domain/list?cached=${cached.value}")
                             if (response.status == HttpStatusCode.OK) {
                                 val domainList = response.body<List<Domain>>()
                                 logger.info { "Received domains: $domainList" }
@@ -93,7 +103,7 @@ fun Home(navigator: Navigator) {
                                 }
                             } else {
                                 // Show error
-                                errorMsg.value = response.body()
+                                errorMsg.value = response.status.description
                                 openDialog.value = true
                             }
                         } catch (ex: Exception) {
@@ -122,7 +132,7 @@ fun Home(navigator: Navigator) {
         }
 
         if (openDialog.value) {
-            Alert(openDialog, serverViewModel.serverUrl)
+            ErrorAlert(openDialog, errorMsg.value)
         }
 
         if (!cached.value && isLoading) {
@@ -135,10 +145,8 @@ fun Home(navigator: Navigator) {
 
     LaunchedEffect(Unit) {
         try {
-            // TODO move this to domainViewModel
-            // "Authorization": 'Bearer $jwt'
-            val response = serverViewModel.client()
-                .get("${serverViewModel.serverUrl}/api/domain/list?cached=true")
+            val response = client
+                .get("${serverUrl}/api/domain/list?cached=${cached.value}")
             if (response.status == HttpStatusCode.OK) {
                 response.body<List<Domain>>().forEach {
                     if (!domains.contains(it)) {
@@ -147,7 +155,7 @@ fun Home(navigator: Navigator) {
                 }
             } else {
                 // Show error
-                errorMsg.value = response.body()
+                errorMsg.value = response.status.description
                 openDialog.value = true
             }
         } catch (ex: Exception) {
@@ -172,7 +180,7 @@ fun MessageList(domains: List<Domain>) {
         items(domains.size) { index ->
             Card(
                 modifier = Modifier
-                    .height(60.dp)
+                    .height(35.dp)
                     .padding(4.dp)
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
@@ -182,53 +190,44 @@ fun MessageList(domains: List<Domain>) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier
-                            .fillMaxWidth()
+                    Text(
+                        modifier = Modifier.padding(start = 12.dp),
+                        text = domains[index].url,
+                        fontWeight = FontWeight.Bold
+                    )
+                    IconButton(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        onClick = {
+                            expanded.value = !expanded.value
+                        }
                     ) {
-                        Text(
-                            text = domains[index].url,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        //modifier = Modifier.fillMaxWidth()
-                    ) {
-                        IconButton(
-                            onClick = {
-                                expanded.value = !expanded.value
-                            }
+                        Column(
+                            horizontalAlignment = Alignment.End
                         ) {
-                            Column(
-                                horizontalAlignment = Alignment.End
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                "More"
+                            )
+                            DropdownMenu(
+                                expanded = expanded.value,
+                                onDismissRequest = { expanded.value = false },
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    "More"
-                                )
-                                DropdownMenu(
-                                    expanded = expanded.value,
-                                    onDismissRequest = { expanded.value = false },
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("Open") },
-                                        onClick = {
-                                            domain = domains[index].url
-                                        })
-                                    Divider()
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                "Delete",
-                                                style = TextStyle(color = MaterialTheme.colorScheme.error)
-                                            )
-                                        },
-                                        onClick = {
-                                            // Delete Domain with Alert warning
-                                        })
-                                }
+                                DropdownMenuItem(
+                                    text = { Text("Open") },
+                                    onClick = {
+                                        domain = domains[index].url
+                                    })
+                                Divider()
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            "Delete",
+                                            style = TextStyle(color = MaterialTheme.colorScheme.error)
+                                        )
+                                    },
+                                    onClick = {
+                                        // Delete Domain with Alert warning
+                                    })
                             }
                         }
                     }
@@ -238,7 +237,7 @@ fun MessageList(domains: List<Domain>) {
     }
 
     if(domain.isNotEmpty()) {
-        openInBrowser("https://${domain}").also {
+        OpenInBrowser("https://${domain}").also {
             domain = ""
         }
     }

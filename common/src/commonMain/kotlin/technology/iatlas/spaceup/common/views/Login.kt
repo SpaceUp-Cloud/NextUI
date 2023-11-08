@@ -47,16 +47,21 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.koin.koinViewModel
 import moe.tlaster.precompose.navigation.Navigator
-import moe.tlaster.precompose.ui.viewModel
-import technology.iatlas.spaceup.common.components.Alert
+import moe.tlaster.precompose.stateholder.LocalSavedStateHolder
+import org.koin.core.parameter.parametersOf
+import technology.iatlas.spaceup.common.components.ErrorAlert
+import technology.iatlas.spaceup.common.components.FullscreenCircularLoader
 import technology.iatlas.spaceup.common.model.Routes
 import technology.iatlas.spaceup.common.model.SettingsConstants
 import technology.iatlas.spaceup.common.viewmodel.AuthenticationViewModel
 import technology.iatlas.spaceup.common.viewmodel.ServerViewModel
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
 fun Login(navigator: Navigator) {
     /*
@@ -84,12 +89,12 @@ fun Login(navigator: Navigator) {
         settings.getBoolean(SettingsConstants.REMEMBER_CREDENTIALS.toString(), false)) }
 
     val coroutineScope = rememberCoroutineScope()
-    val serverViewModel = viewModel(ServerViewModel::class) {
-        ServerViewModel()
-    }
-    val authenticationViewModel = viewModel(AuthenticationViewModel::class) {
-        AuthenticationViewModel()
-    }
+    val stateHolder = LocalSavedStateHolder.current
+
+    val serverViewModel = koinViewModel(ServerViewModel::class) { parametersOf(stateHolder) }
+    val serverUrl = serverViewModel.serverUrl
+
+    val authenticationViewModel = koinViewModel(AuthenticationViewModel::class)
 
     Column(
         // modifier = Modifier.fillMaxSize(), // To make it center center
@@ -105,6 +110,7 @@ fun Login(navigator: Navigator) {
                 .height(48.dp)
         ) {
             Text(
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .padding(horizontal = 36.dp)
                     .align(Alignment.CenterHorizontally),
@@ -126,19 +132,21 @@ fun Login(navigator: Navigator) {
             label = {
                 Text("SpaceUp-Server")
             },
-            value = serverViewModel.serverUrl,
+            value = serverUrl,
             onValueChange = {
-                val serverUrl = it.trim()
-                serverViewModel.serverUrl = serverUrl
+                val updatedServerUrl = it.trim()
+                serverViewModel.serverUrl = updatedServerUrl
                 if(rememberServer) {
                     val serverConst = SettingsConstants.SERVER_URL.toString()
                     settings[serverConst] = serverUrl
                 }
             }
         )
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Checkbox(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
                 checked = rememberServer,
                 onCheckedChange = {
                     rememberServer = it
@@ -146,13 +154,15 @@ fun Login(navigator: Navigator) {
                     val serverConst = SettingsConstants.SERVER_URL.toString()
                     settings[rememberServerConst] = rememberServer
                     if(rememberServer) {
-                        settings[serverConst] = serverViewModel.serverUrl
+                        settings[serverConst] = serverUrl
                     } else {
                         settings[serverConst] = ""
                     }
                 }
             )
-            Text("Remember server?", modifier = Modifier.padding(16.dp))
+            Text(
+                color = MaterialTheme.colorScheme.secondary,
+                text = "Remember server?", modifier = Modifier.padding(start = 16.dp))
         }
         Spacer(modifier = Modifier.height(15.dp))
         OutlinedTextField(
@@ -217,9 +227,11 @@ fun Login(navigator: Navigator) {
                 }
             }
         )
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Checkbox(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
                 checked = rememberUserPassword,
                 onCheckedChange = {
                     rememberUserPassword = it
@@ -236,26 +248,34 @@ fun Login(navigator: Navigator) {
                     }
                 }
             )
-            Text("Remember Credentials?", modifier = Modifier.padding(16.dp))
+            Text(
+                color = MaterialTheme.colorScheme.secondary,
+                text = "Remember Credentials?", modifier = Modifier.padding(start = 16.dp)
+            )
         }
         Row {
             val formIsFilled = authenticationViewModel.username.isNotEmpty()
-                    && authenticationViewModel.password.isNotEmpty() && serverViewModel.serverUrl.isNotEmpty()
+                    && authenticationViewModel.password.isNotEmpty() && serverUrl.isNotEmpty()
             AnimatedVisibility(formIsFilled) {
                 Button(
                     onClick = {
                         isLoading = true
-                        coroutineScope.launch {
-                            logger.info {
-                                "User ${authenticationViewModel.username} is trying to login."
+                            coroutineScope.launch(Dispatchers.IO) {
+                                logger.info {
+                                    "User ${authenticationViewModel.username} is trying to login."
+                                }
+                                try {
+                                    val token = authenticationViewModel.login(serverUrl)
+                                    settings[SettingsConstants.ACCESS_TOKEN.toString()] = token.accessToken
+
+                                    //serverViewModel.updateToken(token.accessToken)
+                                    logger.info { "Finished login" }
+                                    if(token.username.isNotEmpty()) navigator.navigate("/home")
+                                } catch (ex: Exception) {
+                                    openDialog.value = true
+                                    errorMsg.value = ex.message ?: "Cannot login!"
+                                }
                             }
-                            try {
-                                authenticationViewModel.login(navigator, serverViewModel)
-                            } catch (ex: Exception) {
-                                openDialog.value = true
-                                errorMsg.value = ex.message ?: "Cannot login!"
-                            }
-                        }
                         isLoading = false
                     }
                 ) {
@@ -280,6 +300,11 @@ fun Login(navigator: Navigator) {
                 Text("Settings")
             }
         }
+
+        if (openDialog.value) {
+            ErrorAlert(openDialog, errorMsg.value)
+        }
+        if(isLoading) FullscreenCircularLoader(isLoading)
     }
 
     LaunchedEffect(Unit) {
@@ -294,14 +319,9 @@ fun Login(navigator: Navigator) {
 
         serverViewModel.checkExpiresIn()
     }
-
-    if (openDialog.value) {
-        Alert(openDialog, errorMsg.value)
-    }
 }
 
 // TODO Make this general usable for other components
-@OptIn(ExperimentalComposeUiApi::class)
 fun handleKeyEvents(
     navigator: Navigator,
     keyEvent: KeyEvent,     // Get KeyEvents

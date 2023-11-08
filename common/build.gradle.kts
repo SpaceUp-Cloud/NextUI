@@ -2,7 +2,7 @@ plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
     id("com.android.library")
-    kotlin("plugin.serialization") version "1.9.10"
+    kotlin("plugin.serialization") version "1.9.20"
 }
 
 group = "technology.iatlas.spaceup"
@@ -22,12 +22,15 @@ repositories {
     maven {
         url = uri("https://repo1.maven.org/maven2/")
     }
+    maven { url = uri("https://jitpack.io") }
 }
 
 kotlin {
-    android()
+    androidTarget {
+        jvmToolchain(17)
+    }
     jvm("desktop") {
-        jvmToolchain(11)
+        jvmToolchain(17)
     }
     sourceSets {
         val commonMain by getting {
@@ -39,11 +42,19 @@ kotlin {
                 api(compose.materialIconsExtended)
 
                 // ViewModel & Navigation
-                api("moe.tlaster:precompose:1.3.15")
+                val precomposeVersion = "1.5.7"
+                api("moe.tlaster:precompose:$precomposeVersion")
+                api("moe.tlaster:precompose-viewmodel:$precomposeVersion")
+                api("moe.tlaster:precompose-koin:$precomposeVersion")
+                api("io.insert-koin:koin-core:3.5.0")
+                api("io.insert-koin:koin-compose:1.1.0")
+
+                // JWT
+                implementation("io.github.nefilim.kjwt:kjwt-core:0.9.0")
 
                 // Google
-                implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-                implementation("androidx.compose.material3:material3:1.1.1")
+                implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+                implementation("androidx.compose.material3:material3:1.1.2")
                 implementation("androidx.compose.material:material-icons-extended:1.4.3")
 
                 val dataStoreVersion = "1.1.0-alpha04"
@@ -93,6 +104,17 @@ kotlin {
                 implementation("io.ktor:ktor-client-json-jvm:$ktorVersion")
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+                implementation("org.jetbrains.skiko:skiko-android:0.7.80")
+
+                // Lets-Plot Kotlin API
+                implementation("org.jetbrains.lets-plot:lets-plot-kotlin-kernel:4.4.3")
+
+                // Lets-Plot Multiplatform
+                implementation("org.jetbrains.lets-plot:lets-plot-common:4.0.1")
+
+                // Lets-Plot Skia Frontend
+                implementation("org.jetbrains.lets-plot:lets-plot-compose:1.0.0")
             }
         }
         val androidUnitTest by getting {
@@ -107,6 +129,16 @@ kotlin {
                 api(compose.material3)
                 // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
                 implementation("ch.qos.logback:logback-classic:1.4.11")
+
+                // Lets-Plot Kotlin API
+                implementation("org.jetbrains.lets-plot:lets-plot-kotlin-kernel:4.4.3")
+
+                // Lets-Plot Multiplatform
+                implementation("org.jetbrains.lets-plot:lets-plot-common:4.0.1")
+                implementation("org.jetbrains.lets-plot:platf-awt:4.0.1")
+
+                // Lets-Plot Skia Frontend
+                implementation("org.jetbrains.lets-plot:lets-plot-compose:1.0.0")
             }
         }
         val desktopTest by getting
@@ -117,11 +149,11 @@ android {
     compileSdk = 33
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
-        minSdk = 24
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        minSdk = 28
     }
     namespace = "technology.iatlas.spaceup.common"
+}
+dependencies {
+    implementation("io.ktor:ktor-client-logging-jvm:2.3.4")
+    implementation("androidx.compose.ui:ui-geometry-android:1.5.4")
 }

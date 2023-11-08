@@ -10,7 +10,8 @@ enum class SettingsConstants(
     REMEMBER_CREDENTIALS("rememberCredentials", "Remember Credentials", "boolean"),
     USERNAME("username", "Username", "string"),
     PASSWORD("password", "Password", "string"),
-    AUTO_LOGIN("autoLogin", "Auto Login", "boolean");
+    AUTO_LOGIN("autoLogin", "Auto Login", "boolean"),
+    ACCESS_TOKEN("token", "", "string");
 
     override fun toString(): String {
         return naming

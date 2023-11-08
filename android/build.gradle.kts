@@ -27,20 +27,24 @@ repositories {
 dependencies {
     implementation(project(":common"))
     implementation("androidx.activity:activity-compose:1.7.2")
+    //implementation("androidx.activity:activity-compose:1.8.0") // for SDK Version 34
 }
 
 android {
     compileSdk = 33
     defaultConfig {
         applicationId = "technology.iatlas.spaceup.android"
-        minSdk = 24
-        targetSdk =  33
+        minSdk = 28
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0-SNAPSHOT"
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
     }
     buildTypes {
         getByName("release") {

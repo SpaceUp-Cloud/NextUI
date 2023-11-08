@@ -5,7 +5,7 @@ enum class Routes(
     val path: String,
     val drawerBehavior: DrawerBehavior = DrawerBehavior(),
     ) {
-    HOME("Home", "/home"),
+    HOME("Home", "/home", DrawerBehavior(isVisible = false)),
     DOMAINS("Domains", "/domains"),
     SERVICES("Services", "/services"),
     WEBBACKENDS("Web backends", "/webbackends"),
@@ -14,16 +14,6 @@ enum class Routes(
     ABOUT("About", "/about", DrawerBehavior(hasAfterDivider = true)),
     LOGOUT("Logout", "/logout"),
     LOGIN("Login", "/login", DrawerBehavior(isVisible = false)),
-
-    // TODO DELETE me if test is successful
-    // For testing Drawer behavior
-    fake1("Logout", "/a"),
-    fake2("Logout", "/b"),
-    fake3("Logout", "/c"),
-    fake4("Logout", "/d"),
-    fake5("Logout", "/e"),
-    fake6("Logout", "/f"),
-    fake7("Logout", "/g"),
 }
 
 data class DrawerBehavior(

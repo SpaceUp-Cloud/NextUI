@@ -1,4 +1,3 @@
-import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -11,7 +10,7 @@ version = "1.0-SNAPSHOT"
 
 kotlin {
     jvm {
-        jvmToolchain(11)
+        jvmToolchain(17)
         withJava()
     }
     sourceSets {
@@ -21,7 +20,7 @@ kotlin {
                 implementation(compose.desktop.currentOs) {
                     exclude("org.jetbrains.compose.material")
                 }
-                implementation("com.bybutter.compose:compose-jetbrains-expui-theme:2.1.0")
+                implementation("com.bybutter.compose:compose-jetbrains-expui-theme:2.2.0")
             }
         }
         val jvmTest by getting

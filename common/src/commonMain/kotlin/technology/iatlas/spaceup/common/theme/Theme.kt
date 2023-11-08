@@ -2,9 +2,15 @@ package technology.iatlas.spaceup.common.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import moe.tlaster.precompose.PreComposeApp
+import moe.tlaster.precompose.stateholder.SavedStateHolder
+import org.koin.compose.KoinApplication
+import org.koin.dsl.module
+import technology.iatlas.spaceup.common.viewmodel.AuthenticationViewModel
+import technology.iatlas.spaceup.common.viewmodel.ServerViewModel
 
 
 private val LightColors = lightColorScheme(
@@ -75,16 +81,31 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun AppTheme(
   useDarkTheme: Boolean = isSystemInDarkTheme(),
-  content: @Composable () -> Unit
+  appcontent: @Composable () -> Unit
 ) {
-  val colors = if (!useDarkTheme) {
-    LightColors
-  } else {
-    DarkColors
-  }
+    val colors = if (!useDarkTheme) {
+        LightColors
+    } else {
+        DarkColors
+    }
 
-  MaterialTheme(
-    colorScheme = colors,
-    content = content
-  )
+    MaterialTheme(
+        colorScheme = colors,
+        content = {
+            PreComposeApp {
+                KoinApplication(
+                    application = {
+                        modules(
+                            module {
+                                factory { (savedStateHolder: SavedStateHolder) -> ServerViewModel(savedStateHolder) }
+                                single { AuthenticationViewModel() }
+                            }
+                        )
+                    }
+                ) {
+                    appcontent()
+                }
+            }
+        }
+    )
 }

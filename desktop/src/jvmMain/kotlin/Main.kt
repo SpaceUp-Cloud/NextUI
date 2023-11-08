@@ -2,10 +2,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Switch
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -33,24 +31,27 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.lifecycle.Lifecycle
 import moe.tlaster.precompose.lifecycle.LifecycleOwner
 import moe.tlaster.precompose.lifecycle.LifecycleRegistry
+import moe.tlaster.precompose.lifecycle.LocalLifecycleOwner
+import moe.tlaster.precompose.stateholder.LocalStateHolder
+import moe.tlaster.precompose.stateholder.StateHolder
 import moe.tlaster.precompose.ui.BackDispatcher
 import moe.tlaster.precompose.ui.BackDispatcherOwner
 import moe.tlaster.precompose.ui.LocalBackDispatcherOwner
-import moe.tlaster.precompose.ui.LocalLifecycleOwner
-import moe.tlaster.precompose.ui.LocalViewModelStoreOwner
-import moe.tlaster.precompose.viewmodel.ViewModelStore
-import moe.tlaster.precompose.viewmodel.ViewModelStoreOwner
 import technology.iatlas.spaceup.common.App
+import technology.iatlas.spaceup.common.util.Helper.getSystemProfile
 import javax.imageio.ImageIO
 
-val profile = System.getProperty("nextui.profile") ?: ""
+val profile = getSystemProfile()
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class)
 fun main() = application {
     var isDark by remember { mutableStateOf(false) }
-    var isAutoMode by remember { mutableStateOf(false) }
+    var isAutoMode by remember { mutableStateOf(true) }
 
-    val isDarkMode = if(isAutoMode) {
+    val painterIcon = ImageIO.read(this::class.java.getResourceAsStream("/spaceup_icon.png")).toPainter()
+
+    val isDarkMode = if (isAutoMode) {
         isSystemInDarkTheme()
     } else {
         isDark
@@ -63,8 +64,8 @@ fun main() = application {
     }
 
     val state = rememberWindowState(
-        size = DpSize(700.dp, 750.dp),
-        position = WindowPosition(Alignment.BottomCenter)
+        size = DpSize(600.dp, 650.dp),
+        position = WindowPosition(Alignment.Center)
     )
 
     val holder = remember {
@@ -85,17 +86,17 @@ fun main() = application {
 
     ProvideDesktopCompositionLocals(holder) {
         JBWindow(
-            icon = ImageIO.read(this::class.java.getResourceAsStream("/spaceup_icon.png")).toPainter(),
+            icon = painterIcon,
             onCloseRequest = {
                 holder.lifecycle.currentState = Lifecycle.State.Destroyed
                 exitApplication()
             },
-            title = "SpaceUp-NextUI ${if(profile.isNotEmpty()) profile.uppercase() else ""}",
+            title = "SpaceUp-NextUI ${profile.uppercase()}",
             theme = currentTheme,
             state = state,
             mainToolBar = {
                 Row(Modifier.mainToolBarItem(Alignment.End)) {
-                    if(!isAutoMode) {
+                    if (!isAutoMode) {
                         Tooltip("Switch between dark and light mode,\ncurrently is ${if (isDark) "dark" else "light"} mode") {
                             ActionButton(
                                 { isDark = !isDark }, Modifier.size(40.dp), shape = RectangleShape
@@ -133,19 +134,19 @@ private fun ProvideDesktopCompositionLocals(
 ) {
     CompositionLocalProvider(
         LocalLifecycleOwner provides holder,
-        LocalViewModelStoreOwner provides holder,
+        LocalStateHolder provides holder.stateHolder,
         LocalBackDispatcherOwner provides holder,
     ) {
         content.invoke()
     }
 }
 
-private class PreComposeWindowHolder : LifecycleOwner, ViewModelStoreOwner, BackDispatcherOwner {
+private class PreComposeWindowHolder : LifecycleOwner, BackDispatcherOwner {
     override val lifecycle by lazy {
         LifecycleRegistry()
     }
-    override val viewModelStore by lazy {
-        ViewModelStore()
+    val stateHolder by lazy {
+        StateHolder()
     }
     override val backDispatcher by lazy {
         BackDispatcher()

@@ -6,11 +6,9 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.logging.*
 import io.ktor.serialization.gson.*
-import io.ktor.serialization.kotlinx.json.*
 
-actual fun httpClient(bearerToken: String): HttpClient {
+actual fun httpClient(token: String): HttpClient {
     return HttpClient(Android) {
         /*install(Logging) {
             logger = Logger.DEFAULT
@@ -22,12 +20,13 @@ actual fun httpClient(bearerToken: String): HttpClient {
         install(Auth) {
             bearer {
                 loadTokens {
-                    BearerTokens(bearerToken, "")
+                    BearerTokens(token, "")
                 }
             }
         }
         install(HttpTimeout) {
-            requestTimeoutMillis = 20000 // Webbackend list, Get domains take rather long
+            // 60 secs
+            requestTimeoutMillis = 60000 // Webbackend list, Get domains take rather long
         }
     }
 }

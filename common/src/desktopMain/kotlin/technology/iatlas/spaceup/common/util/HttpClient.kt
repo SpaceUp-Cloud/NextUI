@@ -9,15 +9,21 @@ import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.serialization.gson.*
+import technology.iatlas.spaceup.common.util.Helper.getSystemProfile
 
-val profile = System.getProperty("nextui.profile") ?: ""
+val profile = getSystemProfile()
 
-actual fun httpClient(bearerToken: String): HttpClient {
+actual fun httpClient(token: String): HttpClient {
     return HttpClient(CIO) {
-        if(profile == "dev") {
+        if (profile == "dev") {
             install(Logging) {
                 logger = Logger.DEFAULT
                 level = LogLevel.ALL
+            }
+        } else {
+            install(Logging) {
+                logger = Logger.DEFAULT
+                level = LogLevel.INFO
             }
         }
         install(ContentNegotiation) {
@@ -28,12 +34,12 @@ actual fun httpClient(bearerToken: String): HttpClient {
         install(Auth) {
             bearer {
                 loadTokens {
-                    BearerTokens(bearerToken, "")
+                    BearerTokens(token, "")
                 }
             }
         }
         install(HttpTimeout) {
-            requestTimeoutMillis = 20000 // Webbackend list, Get domains take rather long
+            requestTimeoutMillis = 60000 // Webbackend list, Get domains take rather long
         }
     }
 }

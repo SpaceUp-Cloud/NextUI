@@ -8,6 +8,10 @@ actual fun getPlatformName(): String {
 }
 
 @Composable
-actual fun openInBrowser(domain: String) {
+actual fun OpenInBrowser(domain: String) {
     LocalUriHandler.current.openUri(domain)
+}
+
+@Composable
+actual fun notify(title: String, body: String, type: String) {
 }
