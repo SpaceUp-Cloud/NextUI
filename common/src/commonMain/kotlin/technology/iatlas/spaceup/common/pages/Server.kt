@@ -60,7 +60,6 @@ fun Server() {
 
     val stateHolder = LocalSavedStateHolder.current
     val serverViewModel = koinViewModel(ServerViewModel::class) { org.koin.core.parameter.parametersOf(stateHolder) }
-
     val serverUrl = serverViewModel.serverUrl
 
     Column(

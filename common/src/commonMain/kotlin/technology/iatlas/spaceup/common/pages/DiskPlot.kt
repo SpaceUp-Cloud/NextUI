@@ -31,12 +31,32 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.russhwolf.settings.Settings
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import moe.tlaster.precompose.koin.koinViewModel
+import moe.tlaster.precompose.stateholder.LocalSavedStateHolder
+import org.koin.core.parameter.parametersOf
+import technology.iatlas.spaceup.common.model.SettingsConstants
+import technology.iatlas.spaceup.common.util.httpClient
+import technology.iatlas.spaceup.common.viewmodel.ServerViewModel
 import kotlin.math.atan2
 import kotlin.math.min
 
 @Composable
 fun DiskPlot() {
     // TODO use real data from API
+
+    val logger = KotlinLogging.logger {  }
+
+    val settings = Settings()
+    val diskUsage = remember { mutableStateOf(Disk("", 0F, "", 0F)) }
+
+    val stateHolder = LocalSavedStateHolder.current
+    val serverViewModel = koinViewModel(ServerViewModel::class) { parametersOf(stateHolder) }
+    val serverUrl = serverViewModel.serverUrl
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -54,11 +74,28 @@ fun DiskPlot() {
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally),
                 colors = listOf(MaterialTheme.colorScheme.inversePrimary, MaterialTheme.colorScheme.secondary),
-                inputValues = listOf(10f, 20f)
+                disk = diskUsage.value
             )
         }
     }
+
+    LaunchedEffect(Unit) {
+        val client =  httpClient(settings.getString(SettingsConstants.ACCESS_TOKEN.toString(), ""))
+        try {
+            val response = client.get("$serverUrl/api/system/disk")
+            diskUsage.value = response.body<Disk>()
+        } catch (e: Exception) {
+            logger.error { e }
+        }
+    }
 }
+
+data class Disk(
+    val space: String,
+    val spacePercentage: Float,
+    val quota: String,
+    val availableQuota: Float
+)
 
 /**
  * Component for creating Donut Chart
@@ -77,7 +114,8 @@ private val defaultSliceClickPadding = 8.dp
 internal fun DonutChart(
     modifier: Modifier = Modifier,
     colors: List<Color>,
-    inputValues: List<Float>,
+    //inputValues: List<Float>,
+    disk: Disk,
     sliceWidthDp: Dp = defaultSliceWidth,
     slicePaddingDp: Dp = defaultSlicePadding,
     sliceClickPaddingDp: Dp = defaultSliceClickPadding,
@@ -89,10 +127,6 @@ internal fun DonutChart(
     val usedDiskSpaceColor = MaterialTheme.colorScheme.secondary
     val freeDiskSpaceColor = MaterialTheme.colorScheme.inverseSurface
 
-    assert(inputValues.isNotEmpty() && inputValues.size == colors.size) {
-        "Input values count must be equal to colors size"
-    }
-
     // disk text
     val text = buildAnnotatedString {
         // Max disk space
@@ -102,7 +136,7 @@ internal fun DonutChart(
                 fontSize = 22.sp
             )
         ) {
-            append("Max disk space:\n")
+            append("Max disk quota:\n")
         }
         withStyle(
             style = SpanStyle(
@@ -110,7 +144,7 @@ internal fun DonutChart(
                 fontSize = 18.sp
             )
         ) {
-            append("10GB\n")
+            append("${disk.quota}\n")
             append("\n")
         }
 
@@ -129,7 +163,7 @@ internal fun DonutChart(
                 fontSize = 18.sp
             )
         ) {
-            append("8GB\n")
+            append("${disk.space}\n")
         }
         // Free disk space
         withStyle(
@@ -146,11 +180,23 @@ internal fun DonutChart(
                 fontSize = 18.sp
             )
         ) {
-            append("2GB\n")
+            val regexSplit = "(\\d+)(\\D+)".toRegex()
+            val maxDiskMatcher = regexSplit.find(disk.quota)
+            val spaceDiskMatcher = regexSplit.find(disk.space)
+
+            if(maxDiskMatcher != null && spaceDiskMatcher != null) {
+                val (maxDiskValue, maxDiskUnit) = maxDiskMatcher.destructured
+                val (spaceDiskMatcherValue, _) = spaceDiskMatcher.destructured
+                val result = maxDiskValue.toInt().minus(spaceDiskMatcherValue.toInt())
+                append("${result}$maxDiskUnit\n")
+            } else {
+                append("0B\n")
+            }
         }
     }
 
     // calculate each input percentage
+    val inputValues = listOf(disk.spacePercentage, disk.availableQuota)
     val proportions = inputValues.toPercent()
 
     // calculate each input slice degrees
