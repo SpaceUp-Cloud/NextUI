@@ -57,7 +57,7 @@ kotlin {
                 implementation("androidx.compose.material3:material3:1.1.2")
                 implementation("androidx.compose.material:material-icons-extended:1.4.3")
 
-                val dataStoreVersion = "1.1.0-alpha04"
+                val dataStoreVersion = "1.1.0-alpha07"
                 implementation("androidx.datastore:datastore-preferences:$dataStoreVersion")
                 implementation("androidx.datastore:datastore-core-okio:$dataStoreVersion")
 
@@ -97,24 +97,13 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 api("androidx.appcompat:appcompat:1.6.1")
-                api("androidx.core:core-ktx:1.10.1")
+                api("androidx.core:core-ktx:1.12.0")
 
                 val ktorVersion = "2.3.4"
                 implementation("io.ktor:ktor-client-android:$ktorVersion")
                 implementation("io.ktor:ktor-client-json-jvm:$ktorVersion")
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-                implementation("org.jetbrains.skiko:skiko-android:0.7.80")
-
-                // Lets-Plot Kotlin API
-                implementation("org.jetbrains.lets-plot:lets-plot-kotlin-kernel:4.4.3")
-
-                // Lets-Plot Multiplatform
-                implementation("org.jetbrains.lets-plot:lets-plot-common:4.0.1")
-
-                // Lets-Plot Skia Frontend
-                implementation("org.jetbrains.lets-plot:lets-plot-compose:1.0.0")
             }
         }
         val androidUnitTest by getting {
@@ -129,16 +118,6 @@ kotlin {
                 api(compose.material3)
                 // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
                 implementation("ch.qos.logback:logback-classic:1.4.11")
-
-                // Lets-Plot Kotlin API
-                implementation("org.jetbrains.lets-plot:lets-plot-kotlin-kernel:4.4.3")
-
-                // Lets-Plot Multiplatform
-                implementation("org.jetbrains.lets-plot:lets-plot-common:4.0.1")
-                implementation("org.jetbrains.lets-plot:platf-awt:4.0.1")
-
-                // Lets-Plot Skia Frontend
-                implementation("org.jetbrains.lets-plot:lets-plot-compose:1.0.0")
             }
         }
         val desktopTest by getting
