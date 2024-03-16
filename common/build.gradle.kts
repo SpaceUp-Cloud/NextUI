@@ -108,7 +108,7 @@ kotlin {
         }
         val androidUnitTest by getting {
             dependencies {
-                implementation("org.junit.jupiter:junit-jupiter:5.10.0")
+                implementation("org.junit.jupiter:junit-jupiter:5.10.2")
             }
         }
         val desktopMain by getting {
