@@ -133,6 +133,6 @@ android {
     namespace = "technology.iatlas.spaceup.common"
 }
 dependencies {
-    implementation("io.ktor:ktor-client-logging-jvm:2.3.4")
+    implementation("io.ktor:ktor-client-logging-jvm:2.3.9")
     implementation("androidx.compose.ui:ui-geometry-android:1.5.4")
 }
