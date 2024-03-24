@@ -47,7 +47,7 @@ kotlin {
                 api("moe.tlaster:precompose-viewmodel:$precomposeVersion")
                 api("moe.tlaster:precompose-koin:$precomposeVersion")
                 api("io.insert-koin:koin-core:3.5.0")
-                api("io.insert-koin:koin-compose:1.1.0")
+                api("io.insert-koin:koin-compose:1.1.2")
 
                 // JWT
                 implementation("io.github.nefilim.kjwt:kjwt-core:0.9.0")
