@@ -63,7 +63,7 @@ kotlin {
 
                 // Jetbrains
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
                 val ktorVersion = "2.3.4"
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
